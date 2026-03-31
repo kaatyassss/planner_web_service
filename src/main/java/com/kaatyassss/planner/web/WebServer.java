@@ -5,6 +5,7 @@ import com.kaatyassss.planner.web.handler.AdminHandler;
 import com.kaatyassss.planner.web.handler.CategoryHandler;
 import com.kaatyassss.planner.web.handler.LoginHandler;
 import com.kaatyassss.planner.web.handler.LogoutHandler;
+import com.kaatyassss.planner.web.handler.RegisterHandler;
 import com.kaatyassss.planner.web.handler.TaskHandler;
 import com.kaatyassss.planner.web.util.EnvLoader;
 import com.sun.net.httpserver.HttpServer;
@@ -26,8 +27,9 @@ public class WebServer {
         AdminHandler adminHandler = new AdminHandler();
 
         // Авторизация
-        server.createContext("/login",  new LoginHandler());
-        server.createContext("/logout", new LogoutHandler());
+        server.createContext("/login",    new LoginHandler());
+        server.createContext("/logout",   new LogoutHandler());
+        server.createContext("/register", new RegisterHandler());
 
         // Задачи
         server.createContext("/",             taskHandler);

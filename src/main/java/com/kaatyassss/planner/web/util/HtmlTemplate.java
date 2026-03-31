@@ -86,9 +86,42 @@ public final class HtmlTemplate {
                     </div>
                     <button class="btn btn-primary" type="submit">Войти</button>
                   </form>
+                  <p style="margin-top:16px;font-size:14px">Нет аккаунта? <a href="/register">Зарегистрироваться</a></p>
                 </div>
                 """.formatted(err);
         return layout("Вход", body, null);
+    }
+
+    public static String registerPage(String error) {
+        String err = error != null ? "<p class=\"error\">" + HttpUtil.escape(error) + "</p>" : "";
+        String body = """
+                <div class="card">
+                  <h2>Регистрация</h2>
+                  <br>
+                  %s
+                  <form method="post" action="/register">
+                    <div class="field">
+                      <label>Логин</label>
+                      <input type="text" name="username" required autofocus>
+                    </div>
+                    <div class="field">
+                      <label>Email</label>
+                      <input type="email" name="email" required>
+                    </div>
+                    <div class="field">
+                      <label>Пароль</label>
+                      <input type="password" name="password" required>
+                    </div>
+                    <div class="field">
+                      <label>Повторите пароль</label>
+                      <input type="password" name="confirm" required>
+                    </div>
+                    <button class="btn btn-primary" type="submit">Зарегистрироваться</button>
+                  </form>
+                  <p style="margin-top:16px;font-size:14px">Уже есть аккаунт? <a href="/login">Войти</a></p>
+                </div>
+                """.formatted(err);
+        return layout("Регистрация", body, null);
     }
 
     public static String taskListPage(List<Task> tasks, List<Category> categories, User user) {
