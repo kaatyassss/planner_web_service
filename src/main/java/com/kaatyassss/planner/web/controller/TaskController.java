@@ -2,6 +2,7 @@ package com.kaatyassss.planner.web.controller;
 
 import com.kaatyassss.planner.web.dao.CategoryDao;
 import com.kaatyassss.planner.web.dao.TaskDao;
+import com.kaatyassss.planner.web.model.Task;
 import com.kaatyassss.planner.web.model.User;
 import com.kaatyassss.planner.web.util.HtmlTemplate;
 import jakarta.servlet.http.HttpServletRequest;
@@ -75,6 +76,57 @@ public class TaskController {
         taskDao.create(name.trim(), status, taskDate, false, user.getId(), selectedCategoryId);
 
         // Перенаправление предотвращает повторное создание при обновлении страницы
+        return ResponseEntity.status(302).header("Location", "/").build();
+    }
+    // GET загружает задачу по id и показывает форму с текущими значениями
+    @GetMapping("/tasks/edit")
+    public ResponseEntity<String> editTaskForm(
+            @RequestParam(name = "id") int id, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        User user = session == null ? null : (User) session.getAttribute("user");
+        if (user == null) {
+            return ResponseEntity.status(302).header("Location", "/login").build();
+        }
+
+        Task task = taskDao.findById(id).orElse(null);
+        // Редактирование доступно владельцу задачи или администратору
+        if (task == null || (!user.isAdmin()
+                && !Integer.valueOf(user.getId()).equals(task.getUserId()))) {
+            return ResponseEntity.status(302).header("Location", "/").build();
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("text/html;charset=UTF-8"))
+                .body(HtmlTemplate.taskFormPage(task, categoryDao.findAll(), user));
+    }
+
+    // POST сохраняет поля формы редактирования и возвращает пользователя к списку
+    @PostMapping("/tasks/edit")
+    public ResponseEntity<String> updateTask(
+            @RequestParam(name = "id") int id,
+            @RequestParam(name = "name", defaultValue = "") String name,
+            @RequestParam(name = "date", defaultValue = "") String date,
+            @RequestParam(name = "status", defaultValue = "В работе") String status,
+            @RequestParam(name = "category_id", defaultValue = "") String categoryId,
+            HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        User user = session == null ? null : (User) session.getAttribute("user");
+        if (user == null) {
+            return ResponseEntity.status(302).header("Location", "/login").build();
+        }
+
+        Task task = taskDao.findById(id).orElse(null);
+        // Повторяем проверку при сохранении: POST можно отправить без открытия формы
+        if (task == null || (!user.isAdmin()
+                && !Integer.valueOf(user.getId()).equals(task.getUserId()))) {
+            return ResponseEntity.status(302).header("Location", "/").build();
+        }
+
+        // Как в прежнем обработчике, отметка выполнения определяется выбранным статусом
+        LocalDate taskDate = date.isBlank() ? LocalDate.now() : LocalDate.parse(date);
+        Integer selectedCategoryId = categoryId.isBlank() ? null : Integer.parseInt(categoryId);
+        boolean checked = "Выполнено".equals(status);
+        taskDao.update(id, name.trim(), status, taskDate, checked, selectedCategoryId);
         return ResponseEntity.status(302).header("Location", "/").build();
     }
 }
