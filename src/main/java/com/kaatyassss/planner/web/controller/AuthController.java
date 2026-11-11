@@ -59,4 +59,47 @@ public class AuthController {
         }
         return ResponseEntity.status(302).header("Location", "/login").build();
     }
+    // Показывает существующую форму регистрации без сообщения об ошибке
+    @GetMapping(value = "/register", produces = "text/html;charset=UTF-8")
+    @ResponseBody
+    public String registerPage() {
+        return HtmlTemplate.registerPage(null);
+    }
+
+    // Принимает форму регистрации и сохраняет прежние проверки полей
+    @PostMapping("/register")
+    public ResponseEntity<String> register(
+            @RequestParam(name = "username", defaultValue = "") String username,
+            @RequestParam(name = "email", defaultValue = "") String email,
+            @RequestParam(name = "password", defaultValue = "") String password,
+            @RequestParam(name = "confirm", defaultValue = "") String confirm,
+            HttpServletRequest request) {
+        username = username.trim();
+        email = email.trim();
+        password = password.trim();
+        confirm = confirm.trim();
+
+        String error = null;
+        if (username.isBlank() || email.isBlank() || password.isBlank()) {
+            error = "Заполните все поля";
+        } else if (!password.equals(confirm)) {
+            error = "Пароли не совпадают";
+        } else if (userDao.findByUsername(username).isPresent()) {
+            error = "Пользователь с таким логином уже существует";
+        }
+
+        // При ошибке возвращаем ту же страницу с пояснением
+        if (error != null) {
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType("text/html;charset=UTF-8"))
+                    .body(HtmlTemplate.registerPage(error));
+        }
+
+        // Роль задаётся на сервере: регистрация создаёт обычного пользователя
+        User user = userDao.create(username, password, email, "user");
+        HttpSession session = request.getSession();
+        request.changeSessionId();
+        session.setAttribute("user", user);
+        return ResponseEntity.status(302).header("Location", "/").build();
+    }
 }
