@@ -48,4 +48,15 @@ public class AuthController {
         // После успешного входа направляем браузер на главную страницу
         return ResponseEntity.status(302).header("Location", "/").build();
     }
+    // Завершает текущую сессию при переходе по существующей ссылке «Выйти»
+    @GetMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletRequest request) {
+        // Не создаём новую сессию, если пользователь уже вышел или ещё не входил
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            // Удаляет данные сессии, включая сохранённого пользователя
+            session.invalidate();
+        }
+        return ResponseEntity.status(302).header("Location", "/login").build();
+    }
 }
