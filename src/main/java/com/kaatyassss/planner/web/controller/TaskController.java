@@ -129,4 +129,42 @@ public class TaskController {
         taskDao.update(id, name.trim(), status, taskDate, checked, selectedCategoryId);
         return ResponseEntity.status(302).header("Location", "/").build();
     }
+    // Сохраняем GET-маршрут, который используется существующей ссылкой удаления
+    @GetMapping("/tasks/delete")
+    public ResponseEntity<String> deleteTask(
+            @RequestParam(name = "id") int id, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        User user = session == null ? null : (User) session.getAttribute("user");
+        if (user == null) {
+            return ResponseEntity.status(302).header("Location", "/login").build();
+        }
+
+        Task task = taskDao.findById(id).orElse(null);
+        // Удалять задачу может её владелец или администратор
+        if (task != null && (user.isAdmin()
+                || Integer.valueOf(user.getId()).equals(task.getUserId()))) {
+            taskDao.delete(id);
+        }
+        return ResponseEntity.status(302).header("Location", "/").build();
+    }
+
+    // Переключает выполнение по существующей ссылке.
+    @GetMapping("/tasks/toggle")
+    public ResponseEntity<String> toggleTask(
+            @RequestParam(name = "id") int id, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        User user = session == null ? null : (User) session.getAttribute("user");
+        if (user == null) {
+            return ResponseEntity.status(302).header("Location", "/login").build();
+        }
+
+        Task task = taskDao.findById(id).orElse(null);
+        // Проверяем владельца и здесь, чтобы нельзя было переключить чужую задачу по id
+        if (task != null && (user.isAdmin()
+                || Integer.valueOf(user.getId()).equals(task.getUserId()))) {
+            // DAO одновременно изменяет отметку выполнения и текстовый статус
+            taskDao.toggleChecked(id);
+        }
+        return ResponseEntity.status(302).header("Location", "/").build();
+    }
 }
