@@ -18,7 +18,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class AuthController {
 
     // Пока используем существующий DAO без изменения способа доступа к БД
-    private final UserDao userDao = new UserDao();
+    private final UserDao userDao;
+
+    // Единственный конструктор используется Spring для внедрения готовых DAO
+    public AuthController(UserDao userDao) {
+        this.userDao = userDao;
+    }
 
     // Показывает существующую форму входа при GET запросе на /login
     @GetMapping(value = "/login", produces = "text/html;charset=UTF-8")

@@ -16,7 +16,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class AdminController {
 
-    private final UserDao userDao = new UserDao();
+    private final UserDao userDao;
+
+    // Единственный конструктор используется Spring для внедрения готовых DAO
+    public AdminController(UserDao userDao) {
+        this.userDao = userDao;
+    }
 
     // Показывает список пользователей только администратору
     @GetMapping("/admin")

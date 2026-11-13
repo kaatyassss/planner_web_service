@@ -1,5 +1,7 @@
 package com.kaatyassss.planner.web.dao;
 
+import org.springframework.stereotype.Repository;
+
 import com.kaatyassss.planner.web.db.DbConnection;
 import com.kaatyassss.planner.web.model.User;
 
@@ -8,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+// Spring создаёт DAO и передаёт его компонентам, которым нужен доступ к данным
+@Repository
 public class UserDao {
 
     public Optional<User> findById(int id) {

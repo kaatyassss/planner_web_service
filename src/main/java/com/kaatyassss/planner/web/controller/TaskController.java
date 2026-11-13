@@ -21,8 +21,14 @@ import java.time.LocalDate;
 public class TaskController {
 
     // Пока сохраняем существующие DAO и SQL запросы
-    private final TaskDao taskDao = new TaskDao();
-    private final CategoryDao categoryDao = new CategoryDao();
+    private final TaskDao taskDao;
+    private final CategoryDao categoryDao;
+
+    // Единственный конструктор используется Spring для внедрения готовых DAO
+    public TaskController(TaskDao taskDao, CategoryDao categoryDao) {
+        this.taskDao = taskDao;
+        this.categoryDao = categoryDao;
+    }
 
     // Показывает задачи текущего пользователя на главной странице
     @GetMapping("/")

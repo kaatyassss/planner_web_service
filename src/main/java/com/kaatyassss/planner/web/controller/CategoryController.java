@@ -17,7 +17,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class CategoryController {
 
-    private final CategoryDao categoryDao = new CategoryDao();
+    private final CategoryDao categoryDao;
+
+    // Единственный конструктор используется Spring для внедрения готовых DAO
+    public CategoryController(CategoryDao categoryDao) {
+        this.categoryDao = categoryDao;
+    }
 
     // Список категорий доступен любому вошедшему пользователю, как и раньше.
     @GetMapping("/categories")
